@@ -1,0 +1,21 @@
+dn: dc=no
+objectClass: domain
+objectClass: top
+dc: no
+
+dn: dc=opendj,dc=no
+dc: opendj
+o: OpenDJ LDAP Server
+description: Root entry for UserStore
+objectClass: top
+objectclass: dcObject
+objectclass: organization
+
+dn: ou=people,dc=opendj,dc=no
+objectclass: organizationalUnit
+ou: people
+
+
+dn: ou=groups,dc=opendj,dc=no
+objectclass: organizationalUnit
+ou: groups
