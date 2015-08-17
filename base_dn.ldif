@@ -1,8 +1,3 @@
-dn: dc=no
-objectClass: domain
-objectClass: top
-dc: no
-
 dn: dc=opendj,dc=no
 dc: opendj
 o: OpenDJ LDAP Server
@@ -10,12 +5,36 @@ description: Root entry for UserStore
 objectClass: top
 objectclass: dcObject
 objectclass: organization
+aci: (targetattr="* || aci")(version 3.0;acl "Allow identity modification"; allow (write)(userdn = "ldap:///uid=openam,ou=admins,dc=opendj,dc=no");)
+aci: (targetattr!="userPassword||authPassword")(version 3.0; acl "Allow identity search"; allow (search, read)(userdn = "ldap:///uid=openam,ou=admins,dc=opendj,dc=no");)
+aci: (targetcontrol="2.16.840.1.113730.3.4.3")(version 3.0;acl "Allow persistent search"; allow (search, read)(userdn = "ldap:///uid=openam,ou=admins,dc=opendj,dc=no");)
+aci: (version 3.0;acl "Add identity"; allow (add)(userdn = "ldap:///uid=openam,ou=admins,dc=opendj,dc=no");)
+aci: (version 3.0;acl "Delete identity"; allow (delete)(userdn = "ldap:///uid=openam,ou=admins,dc=opendj,dc=no");)
 
 dn: ou=people,dc=opendj,dc=no
+objectclass: top
 objectclass: organizationalUnit
 ou: people
 
-
 dn: ou=groups,dc=opendj,dc=no
+objectclass: top
 objectclass: organizationalUnit
 ou: groups
+
+dn: ou=admins,dc=opendj,dc=no
+objectclass: top
+objectclass: organizationalUnit
+ou: admins
+
+dn: uid=openam,ou=admins,dc=opendj,dc=no
+objectclass: top
+objectclass: person
+objectclass: organizationalPerson
+objectclass: inetOrgPerson
+cn: openam
+sn: openam
+uid: openam
+userPassword: Secret1
+ds-privilege-name: subentry-write
+ds-privilege-name: update-schema
+ds-privilege-name: password-reset
