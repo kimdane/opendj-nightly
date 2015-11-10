@@ -113,6 +113,6 @@ RUN /opt/opendj/bin/start-ds; \
 /opt/opendj/bin/verify-index --baseDN dc=openam,dc=no;
      
 
-
+EXPOSE 1636 1389 4444 8989
 CMD ["/opt/opendj/bin/start-ds", "-N"]
 #ENTRYPOINT ["/bin/bash"]
