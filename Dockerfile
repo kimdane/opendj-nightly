@@ -1,118 +1,28 @@
-# OpenAM Enterprise Subscription Docker image
-# Version 1
+FROM java:8
 
-# If you loaded redhat-rhel-server-7.0-x86_64 to your local registry, uncomment
-# this FROM line instead:
-# FROM registry.access.redhat.com/rhel 
-# Pull the rhel image from the local repository
-FROM conductdocker/rhel7
+MAINTAINER warren.strange@gmail.com
 
-MAINTAINER Kim Daniel Engebretsen 
+WORKDIR /opt
 
-# Update image
-#RUN yum update -y
-#RUN yum install -y unzip openssl java-1.7.0-openjdk #-devel # java-1.7.0-oracle-devel
-#RUN yum clean all
+# Fetch the latest nightly build
+RUN curl https://forgerock.org/djs/opendjrel.js?948497823 | grep -o "http://.*\.zip" | tail -1 | xargs curl -o opendj.zip && unzip opendj.zip && rm opendj.zip
 
-ENV OPENDJ_HOME /opt/opendj
-ENV OPENDJ_JAVA_HOME /usr/lib/jvm/jre
-ENV ADMIN_PW Secret1
-ENV KEYSTORE_PW Secret1
+# Creating instance.loc consolidates the writable directories under one root 
+# We also create the extensions directory
+# The strategy is the create a skeleton DJ instance under the instances/template directory
+# and use this template to instantiate a new persistent image.
+RUN echo "/opt/opendj/instances/template" > /opt/opendj/instance.loc  && \
+    mkdir -p /opt/opendj/instances/template/lib/extensions 
 
-# Create an index.html file
-RUN mkdir -p /opt/opendj/docker-config
-ADD opendj-setup.properties /opt/opendj/docker-config/opendj-setup.properties
-ADD base_dn.ldif /opt/opendj/docker-config/base_dn.ldif
-ADD keystore.jceks /opt/opendj/docker-config/keystore.jceks
+ADD run-opendj.sh /opt/run-opendj.sh
+RUN ./opendj/setup --cli -p 389 --ldapsPort 636 --enableStartTLS --generateSelfSignedCertificate \
+    --sampleData 5 --baseDN "dc=example,dc=com" -h localhost --rootUserPassword password --acceptLicense --no-prompt --doNotStart 
 
+EXPOSE 389 636 4444
 
-ADD OpenDJ-2.6.3.zip /tmp/OpenDJ-2.6.3.zip
-RUN cd /opt; unzip /tmp/OpenDJ-2.6.3.zip
-WORKDIR /opt/opendj
+# Copy in the template the first time DJ runs, and start DJ
 
-EXPOSE 8080 1636 1389 4444
-RUN /opt/opendj/setup -i -n -Q --acceptLicense --doNotStart --propertiesFilePath /opt/opendj/docker-config/opendj-setup.properties; \
-echo -e "\nOpenDJ setup script complete\n"; 
+VOLUME ["/opt/repo"]
 
-ADD opendj_user_schema.ldif /opt/opendj/docker-config/opendj_user_schema.ldif
-ADD cts-add-schema.ldif /opt/opendj/docker-config/cts-add-schema.ldif
-ADD add-config-entries.ldif /opt/opendj/docker-config/add-config-entries.ldif
+CMD  ["/opt/run-opendj.sh"]
 
-RUN /opt/opendj/bin/start-ds; \  
-/opt/opendj/bin/dsconfig -D 'cn=Directory Manager' -w "$ADMIN_PW" -p 4444 -X -n --advanced set-global-configuration-prop --set single-structural-objectclass-behavior:accept;\ 
-/opt/opendj/bin/ldapmodify \
-  --port 1389 \
-  --bindDN "cn=Directory Manager" \
-  --bindPassword "$ADMIN_PW" \
-  --defaultAdd \
-  --useStartTLS \
-  --trustAll \
-  --filename /opt/opendj/docker-config/opendj_user_schema.ldif;\
-/opt/opendj/bin/ldapmodify \
-  --port 1389 \
-  --bindDN "cn=Directory Manager" \
-  --bindPassword "$ADMIN_PW" \
-  --useStartTLS \
-  --trustAll \
-  --fileName /opt/opendj/docker-config/cts-add-schema.ldif; \
-/opt/opendj/bin/dsconfig create-backend --backend-name cfgStore --set base-dn:dc=openam,dc=no --set enabled:true --type local-db --port 4444 --bindDN "cn=Directory Manager" --bindPassword "$ADMIN_PW" --no-prompt;\ 
-/opt/opendj/bin/ldapmodify \
-  --port 1389 \
-  --bindDN "cn=Directory Manager" \
-  --bindPassword "$ADMIN_PW" \
-  --defaultAdd \
-  --useStartTLS \
-  --trustAll \
-  --filename /opt/opendj/docker-config/add-config-entries.ldif; \
-/opt/opendj/bin/dsconfig \
-   set-access-control-handler-prop \
-    --add global-aci:'(target = "ldap:///cn=schema")(targetattr = "attributeTypes || \
-      objectClasses")(version 3.0; acl "Modify schema"; allow (write) \
-      (userdn = "ldap:///uid=openam,ou=admins,dc=openam,dc=no");)' \
-    --port 4444 \
-    --bindDN "cn=Directory Manager" \
-    --bindPassword "$ADMIN_PW" \
-    --trustAll \
-    --no-prompt; \
-/opt/opendj/bin/dsconfig \
-   create-local-db-index \
-   --port 4444 \
-   --bindDN "cn=Directory Manager" \
-   --bindPassword "$ADMIN_PW" \
-   --backend-name cfgStore \
-   --index-name iplanet-am-user-federation-info-key \
-   --set index-type:equality \
-   --trustAll \
-   --no-prompt; \
-/opt/opendj/bin/dsconfig \
-   create-local-db-index \
-   --port 4444 \
-   --bindDN "cn=Directory Manager" \
-   --bindPassword "$ADMIN_PW" \
-   --backend-name cfgStore \
-   --index-name sun-fm-saml2-nameid-infokey \
-   --set index-type:equality \
-   --trustAll \
-   --no-prompt; \
-#/opt/opendj/bin/dsconfig \
-#   create-local-db-index \
-#   --port 4444 \
-#   --bindDN "cn=Directory Manager" \
-#   --bindPassword "$ADMIN_PW" \
-#   --backend-name cfgStore \
-#   --index-name sunxmlkeyvalue \
-#   --set index-type:"equality" \
-#   --set index-type:"substring" \
-#   --trustAll \
-#   --no-prompt; \
-/opt/opendj/bin/rebuild-index --port 4444 \
-  --bindDN "cn=Directory Manager" --bindPassword "$ADMIN_PW" \
-  --baseDN dc=openam,dc=no --rebuildAll \
-  --start 0 \
-  --trustAll; \
-/opt/opendj/bin/verify-index --baseDN dc=openam,dc=no;
-     
-
-EXPOSE 1636 1389 4444 8989
-CMD ["/opt/opendj/bin/start-ds", "-N"]
-#ENTRYPOINT ["/bin/bash"]
