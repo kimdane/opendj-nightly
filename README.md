@@ -10,3 +10,10 @@ If you choose not to mount a persistent volume OpenDJ will start OK - but you wi
 
 Ready for fullStack example of ForgeRocks Identity Stack Dockerized
 https://github.com/ConductAS/identity-stack-dockerized.git
+
+
+docker run -d -p 636:636 -p 389:389 --name opendj -v /var/lib/id-stack/repo:/opt/repo conductdocker/opendj-nightly
+
+or stand-alone
+
+docker run -d -p 636:636 -p 389:389 --name opendj conductdocker/opendj-nightly
