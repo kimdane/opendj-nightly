@@ -5,7 +5,7 @@ MAINTAINER warren.strange@gmail.com
 WORKDIR /opt
 
 # Fetch the latest nightly build
-RUN curl https://forgerock.org/djs/opendjrel.js?948497823 | grep -o "http://.*\.zip" | tail -1 | xargs curl -o opendj.zip && unzip opendj.zip && rm opendj.zip
+#RUN curl https://forgerock.org/djs/opendjrel.js?948497823 | grep -o "http://.*\.zip" | tail -1 | xargs curl -o opendj.zip && unzip opendj.zip && rm opendj.zip
 
 # Creating instance.loc consolidates the writable directories under one root 
 # We also create the extensions directory
@@ -15,8 +15,7 @@ RUN echo "/opt/opendj/instances/template" > /opt/opendj/instance.loc  && \
     mkdir -p /opt/opendj/instances/template/lib/extensions 
 
 ADD run-opendj.sh /opt/run-opendj.sh
-RUN ./opendj/setup --cli -p 389 --ldapsPort 636 --enableStartTLS --generateSelfSignedCertificate \
-    --sampleData 5 --baseDN "dc=example,dc=com" -h localhost --rootUserPassword password --acceptLicense --no-prompt --doNotStart 
+RUN /opt/opendj/setup --cli -p 389 --ldapsPort 636 --enableStartTLS --generateSelfSignedCertificate --sampleData 5 --baseDN "dc=example,dc=com" -h localhost --rootUserPassword password --acceptLicense --no-prompt --doNotStart 
 
 EXPOSE 389 636 4444
 
