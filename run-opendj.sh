@@ -18,10 +18,12 @@ else
 	if [ -s "$file" ]; then
 		cp "$file" opendj.zip
 	else
-		curl https://forgerock.org/djs/opendjrel.js?948497823 | grep -o "http://.*\.zip" | tail -1 | xargs curl -o opendj.zip
+		curl https://forgerock.org/djs/opendjrel.js?948497823 | grep -o "http://.*\.zip" | tail -1 | xargs curl -o /opt/repo/bin/staging/opendj.zip	
 	fi
-	unzip opendj.zip -d /opt/opendj
-	rm opendj.zip
+	if [ -s "$file" ]; then
+		unzip /opt/repo/bin/staging/opendj.zip -d /opt/opendj
+		rm /opt/repo/bin/staging/opendj.zip
+	fi
 fi
 /opt/opendj/setup --cli -p 389 --ldapsPort 636 --enableStartTLS --generateSelfSignedCertificate --sampleData 100 --baseDN "dc=example,dc=com" -h localhost --rootUserPassword password --acceptLicense --no-prompt
 /opt/opendj/bin/stop-ds
