@@ -25,9 +25,12 @@ else
 		rm /opt/repo/bin/staging/opendj.zip
 	fi
 fi
-/opt/opendj/setup --cli -p 389 --ldapsPort 636 --enableStartTLS --generateSelfSignedCertificate --sampleData 100 --baseDN "dc=example,dc=com" -h localhost --rootUserPassword password --acceptLicense --no-prompt
-/opt/opendj/bin/stop-ds
 
+dir=/opt/opendj
+if [ -e "$dir" ]; then
+	/opt/opendj/setup --cli -p 389 --ldapsPort 636 --enableStartTLS --generateSelfSignedCertificate --sampleData 100 --baseDN "dc=example,dc=com" -h localhost --rootUserPassword password --acceptLicense --no-prompt
+	/opt/opendj/bin/stop-ds
+fi
 
 # Instance dir does not exist?
 if [ ! -d /opt/opendj/instances/instance1/config ] ; then
