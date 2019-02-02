@@ -18,7 +18,7 @@ else
 	if [ -s "$file" ]; then
 		cp "$file" opendj.zip
 	else
-		curl https://forgerock.org/djs/opendjrel.js?948497823 | grep -o "http://.*\.zip" | tail -1 | xargs curl -o /opt/repo/bin/staging/opendj.zip	
+		echo "Did not find any file, and don't have any open access to openidm.zip"	
 	fi
 	if [ -s "$file" ]; then
 		unzip /opt/repo/bin/staging/opendj.zip -d /opt/opendj
