@@ -26,19 +26,19 @@ else
 	fi
 fi
 
-dir=/opt/opendj
-if [ -e "$dir" ]; then
+file=/opt/opendj/setup
+if [ -s "$file" ]; then
 	/opt/opendj/setup --cli -p 389 --ldapsPort 636 --enableStartTLS --generateSelfSignedCertificate --sampleData 100 --baseDN "dc=example,dc=com" -h localhost --rootUserPassword password --acceptLicense --no-prompt
 	/opt/opendj/bin/stop-ds
-fi
 
-# Instance dir does not exist?
-if [ ! -d /opt/opendj/instances/instance1/config ] ; then
-  # Copy the template
-  mkdir -p /opt/opendj/instances/instance1
-  echo Instance Directory is empty. Creating new instance from template
-  cp -r /opt/opendj/instances/template/* /opt/opendj/instances/instance1
-fi
-echo "/opt/opendj/instances/instance1" > /opt/opendj/instance.loc
+	# Instance dir does not exist?
+	if [ ! -d /opt/opendj/instances/instance1/config ] ; then
+	  # Copy the template
+	  mkdir -p /opt/opendj/instances/instance1
+	  echo Instance Directory is empty. Creating new instance from template
+	  cp -r /opt/opendj/instances/template/* /opt/opendj/instances/instance1
+	fi
+	echo "/opt/opendj/instances/instance1" > /opt/opendj/instance.loc
 
-/opt/opendj/bin/start-ds --nodetach
+	/opt/opendj/bin/start-ds --nodetach
+fi
