@@ -11,8 +11,9 @@ WORKDIR /opt
 # We also create the extensions directory
 # The strategy is the create a skeleton DJ instance under the instances/template directory
 # and use this template to instantiate a new persistent image.
-RUN echo "/opt/opendj/instances/template" > /opt/opendj/instance.loc  && \
-    mkdir -p /opt/opendj/instances/template/lib/extensions 
+RUN mkdir -p /opt/opendj/instances/template/lib/extensions && \
+echo "/opt/opendj/instances/template" > /opt/opendj/instance.loc
+    
 
 ADD run-opendj.sh /opt/run-opendj.sh
 #RUN /opt/opendj/setup --cli -p 389 --ldapsPort 636 --enableStartTLS --generateSelfSignedCertificate --sampleData 5 --baseDN "dc=example,dc=com" -h localhost --rootUserPassword password --acceptLicense --no-prompt --doNotStart 
