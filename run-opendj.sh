@@ -25,8 +25,8 @@ else
 	fi
 fi
 
-file=/opt/opendj/setup
-if [ -s "$file" ]; then
+dir=/opt/opendj/bin
+if [ -e "$dir" ]; then
 	/opt/opendj/setup --cli -p 389 --ldapsPort 636 --enableStartTLS --generateSelfSignedCertificate --sampleData 100 --baseDN "dc=example,dc=com" -h localhost --rootUserPassword password --acceptLicense --no-prompt
 	/opt/opendj/bin/stop-ds
 
