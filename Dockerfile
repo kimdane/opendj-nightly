@@ -1,7 +1,6 @@
 FROM java:8
 
-MAINTAINER warren.strange@gmail.com
-
+MAINTAINER kimdane
 WORKDIR /opt
 
 # Fetch the latest nightly build
