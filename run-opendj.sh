@@ -22,7 +22,6 @@ else
 	fi
 	if [ -s "$file" ]; then
 		unzip /opt/repo/bin/staging/opendj.zip -d /opt/opendj
-		rm /opt/repo/bin/staging/opendj.zip
 	fi
 fi
 
