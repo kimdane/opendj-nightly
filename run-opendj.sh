@@ -9,7 +9,7 @@
 # To "prime" the sytem the first time DJ is run, we copy in a skeleton 
 # DJ instance from the instances/template directory that was created in the Dockerfile
 
-cd /opt
+
 dir=/opt/repo/opendj
 if [ -e "$dir" ]; then
 	cp -rv /opt/repo/opendj /opt/opendj
@@ -20,22 +20,20 @@ else
 	else
 		curl https://forgerock.org/djs/opendjrel.js?948497823 | grep -o "http://.*\.zip" | tail -1 | xargs curl -o opendj.zip
 	fi
-	unzip opendj.zip
+	unzip opendj.zip -d /opt/opendj
+	rm opendj.zip
 fi
-./opendj/setup --cli -p 389 --ldapsPort 636 --enableStartTLS --generateSelfSignedCertificate \
-    --sampleData 100 --baseDN "dc=example,dc=com" -h localhost --rootUserPassword password --acceptLicense --no-prompt \
-    && rm opendj.zip && /opt/opendj/bin/stop-ds
+/opt/opendj/setup --cli -p 389 --ldapsPort 636 --enableStartTLS --generateSelfSignedCertificate --sampleData 100 --baseDN "dc=example,dc=com" -h localhost --rootUserPassword password --acceptLicense --no-prompt
+/opt/opendj/bin/stop-ds
 
-
-cd /opt/opendj
 
 # Instance dir does not exist?
-if [ ! -d instances/instance1/config ] ; then
+if [ ! -d /opt/opendj/instances/instance1/config ] ; then
   # Copy the template
-  mkdir -p instances/instance1
+  mkdir -p /opt/opendj/instances/instance1
   echo Instance Directory is empty. Creating new instance from template
-  cp -r instances/template/* instances/instance1
+  cp -r /opt/opendj/instances/template/* /opt/opendj/instances/instance1
 fi
-echo "/opt/opendj/instances/instance1" > instance.loc
+echo "/opt/opendj/instances/instance1" > /opt/opendj/instance.loc
 
-./bin/start-ds --nodetach
+/opt/opendj/bin/start-ds --nodetach
