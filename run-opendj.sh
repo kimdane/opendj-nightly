@@ -10,13 +10,19 @@
 # DJ instance from the instances/template directory that was created in the Dockerfile
 
 cd /opt
-file=/opt/repo/bin/staging/opendj.zip
-if [ -s "$file" ]; then
-		cp "$file" opendj.zip
+dir=/opt/repo/opendj
+if [ -e "$dir" ]; then
+	cp -rv /opt/repo/opendj /opt/opendj
 else
-	curl https://forgerock.org/djs/opendjrel.js?948497823 | grep -o "http://.*\.zip" | tail -1 | xargs curl -o opendj.zip
+	file=/opt/repo/bin/staging/opendj.zip
+	if [ -s "$file" ]; then
+		cp "$file" opendj.zip
+	else
+		curl https://forgerock.org/djs/opendjrel.js?948497823 | grep -o "http://.*\.zip" | tail -1 | xargs curl -o opendj.zip
+	fi
+	unzip opendj.zip
 fi
-unzip opendj.zip && ./opendj/setup --cli -p 389 --ldapsPort 636 --enableStartTLS --generateSelfSignedCertificate \
+./opendj/setup --cli -p 389 --ldapsPort 636 --enableStartTLS --generateSelfSignedCertificate \
     --sampleData 100 --baseDN "dc=example,dc=com" -h localhost --rootUserPassword password --acceptLicense --no-prompt \
     && rm opendj.zip && /opt/opendj/bin/stop-ds
 
