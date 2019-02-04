@@ -12,7 +12,7 @@
 
 dir=/opt/repo/opendj
 if [ -e "$dir" ]; then
-	cp -rv /opt/repo/opendj /opt/opendj
+	cp -r /opt/repo/opendj /opt/opendj
 else
 	file=/opt/repo/bin/staging/opendj.zip
 	if [ -s "$file" ]; then
