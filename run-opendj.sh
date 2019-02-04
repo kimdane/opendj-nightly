@@ -16,27 +16,30 @@ if [ -e "$dir" ]; then
 else
 	file=/opt/repo/bin/staging/opendj.zip
 	if [ -s "$file" ]; then
-		unzip /opt/repo/bin/staging/opendj.zip -d /opt/opendj
+		unzip /opt/repo/bin/staging/opendj.zip -d /opt/
 	else
 		echo "Did not find any file, and don't have any open access to openidm.zip"	
 	fi
 fi
 
+cd /opt/opendj
 dir=/opt/opendj/bin
 if [ -e "$dir" ]; then
-	/opt/opendj/setup --cli -p 389 --ldapsPort 636 --enableStartTLS --generateSelfSignedCertificate --sampleData 100 --baseDN "dc=example,dc=com" -h localhost --rootUserPassword password --acceptLicense --no-prompt
-	/opt/opendj/bin/stop-ds
+	rm /opt/opendj/instance.loc
+	#/opt/opendj/setup --cli -p 389 --ldapsPort 636 --enableStartTLS --generateSelfSignedCertificate --sampleData 100 --baseDN "dc=example,dc=com" -h localhost --rootUserPassword password --acceptLicense --no-prompt --instancePath /opt/opendj 
+	/opt/opendj/setup -p 389 --ldapsPort 636 --adminConnectorPort 4444 --enableStartTLS --sampleData 100 --baseDN "dc=example,dc=com" -h localhost --rootUserPassword password --acceptLicense --instancePath /opt/opendj/instances/instance1  --doNotStart 
+	#/opt/opendj/bin/stop-ds
 
+	ls /opt/opendj/instances/template/
 	# Instance dir does not exist?
 	if [ ! -d /opt/opendj/instances/instance1/config ] ; then
-	  # Copy the template
-	  mkdir -p /opt/opendj/instances/instance1
-	  echo Instance Directory is empty. Creating new instance from template
-	  cp -r /opt/opendj/instances/template/* /opt/opendj/instances/instance1
+		# Copy the template
+		mkdir -p /opt/opendj/instances/instance1
+		echo Instance Directory is empty. Creating new instance from template
+		cp -r /opt/opendj/instances/template/* /opt/opendj/instances/instance1
 	fi
 	echo "/opt/opendj/instances/instance1" > /opt/opendj/instance.loc
-
 	/opt/opendj/bin/start-ds --nodetach
 else 
-	ls /opt/opendj/bin/
+	ls /opt/opendj
 fi
