@@ -16,12 +16,9 @@ if [ -e "$dir" ]; then
 else
 	file=/opt/repo/bin/staging/opendj.zip
 	if [ -s "$file" ]; then
-		cp "$file" opendj.zip
+		unzip /opt/repo/bin/staging/opendj.zip -d /opt/opendj
 	else
 		echo "Did not find any file, and don't have any open access to openidm.zip"	
-	fi
-	if [ -s "$file" ]; then
-		unzip /opt/repo/bin/staging/opendj.zip -d /opt/opendj
 	fi
 fi
 
@@ -40,4 +37,6 @@ if [ -e "$dir" ]; then
 	echo "/opt/opendj/instances/instance1" > /opt/opendj/instance.loc
 
 	/opt/opendj/bin/start-ds --nodetach
+else 
+	ls /opt/opendj/bin/
 fi
