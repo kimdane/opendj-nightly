@@ -9,37 +9,42 @@
 # To "prime" the sytem the first time DJ is run, we copy in a skeleton 
 # DJ instance from the instances/template directory that was created in the Dockerfile
 
+# opendj=/opt/opendj
+# opendjconf=/opt/repo/opendj
+# opendjbin=/opt/repo/bin/opendj
+# opendjzip=/opt/repo/bin/zip/opendj.zip
 
-dir=/opt/repo/opendj
-if [ -e "$dir" ]; then
-	cp -r /opt/repo/opendj /opt/opendj
+if [ -e "$opendjbin" ]; then
+	cp -r $opendjbin $opendj
 else
-	file=/opt/repo/bin/staging/opendj.zip
-	if [ -s "$file" ]; then
-		unzip /opt/repo/bin/staging/opendj.zip -d /opt/
+	if [ -s "$opendjzip" ]; then
+		unzip $opendjzip -d /opt/
 	else
-		echo "Did not find any file, and don't have any open access to openidm.zip"	
+		echo "Did not find any opendj folder at $opendjbin, and don't have any open access to zipfile $opendjzip"	
 	fi
 fi
 
-cd /opt/opendj
-dir=/opt/opendj/bin
-if [ -e "$dir" ]; then
-	rm /opt/opendj/instance.loc
-	#/opt/opendj/setup --cli -p 389 --ldapsPort 636 --enableStartTLS --generateSelfSignedCertificate --sampleData 100 --baseDN "dc=example,dc=com" -h localhost --rootUserPassword password --acceptLicense --no-prompt --instancePath /opt/opendj 
-	/opt/opendj/setup -p 389 --ldapsPort 636 --adminConnectorPort 4444 --enableStartTLS --sampleData 100 --baseDN "dc=example,dc=com" -h localhost --rootUserPassword password --acceptLicense --instancePath /opt/opendj/instances/instance1  --doNotStart 
-	#/opt/opendj/bin/stop-ds
+if [ -e "$opendjconf" ]; then
+	cp -r $opendjconf/* $opendj/
+fi
 
-	ls /opt/opendj/instances/template/
+if [ -e "$opendj/bin" ]; then
+	cd $opendj
+	rm $opendj/instance.loc
+	#/opt/opendj/setup --cli -p 389 --ldapsPort 636 --enableStartTLS --generateSelfSignedCertificate --sampleData 100 --baseDN "dc=example,dc=com" -h localhost --rootUserPassword password --acceptLicense --no-prompt --instancePath /opt/opendj 
+	./setup --cli -p 389 --ldapsPort 636 --adminConnectorPort 4444 --enableStartTLS --generateSelfSignedCertificate --sampleData 100 --baseDN "dc=example,dc=com" -h localhost --rootUserPassword password --acceptLicense --no-prompt --instancePath $opendj/instances/instance1 --doNotStart 
+	./bin/stop-ds
+
 	# Instance dir does not exist?
-	if [ ! -d /opt/opendj/instances/instance1/config ] ; then
+	if [ ! -d $opendj/instances/instance1/config ] ; then
 		# Copy the template
-		mkdir -p /opt/opendj/instances/instance1
+		mkdir -p $opendj/instances/instance1
 		echo Instance Directory is empty. Creating new instance from template
-		cp -r /opt/opendj/instances/template/* /opt/opendj/instances/instance1
+		cp -r $opendj/instances/template/* $opendj/instances/instance1
 	fi
-	echo "/opt/opendj/instances/instance1" > /opt/opendj/instance.loc
-	/opt/opendj/bin/start-ds --nodetach
+	echo "$opendj/instances/instance1" > $opendj/instance.loc
+	./bin/start-ds --nodetach
 else 
-	ls /opt/opendj
+	echo "Failed to find opendj binaries"
+	exit 1
 fi
