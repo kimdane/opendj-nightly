@@ -30,9 +30,8 @@ fi
 
 if [ -e "$opendj/bin" ]; then
 	cd $opendj
-	rm $opendj/instance.loc
-	#/opt/opendj/setup --cli -p 389 --ldapsPort 636 --enableStartTLS --generateSelfSignedCertificate --sampleData 100 --baseDN "dc=example,dc=com" -h localhost --rootUserPassword password --acceptLicense --no-prompt --instancePath /opt/opendj 
-	./setup -p 389 --ldapsPort 636 --adminConnectorPort 4444 --enableStartTLS --generateSelfSignedCertificate --sampleData 100 --baseDN "dc=example,dc=com" -h localhost --rootUserPassword password --acceptLicense --no-prompt --instancePath $opendj/instances/instance1 --doNotStart 
+	mkdir -p $opendj/instances/instance1
+	./setup -p 389 --ldapsPort 636 --adminConnectorPort 4444 --enableStartTLS --sampleData 100 --baseDN "dc=example,dc=com" -h localhost --rootUserPassword password --acceptLicense --instancePath $opendj/instances/instance1 --doNotStart 
 	./bin/stop-ds
 
 	# Instance dir does not exist?
